@@ -1,30 +1,48 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:taskflow/main.dart';
 
 void main() {
-  testWidgets('shows a motivational message below the greeting', (
+  testWidgets('updates pending tasks and disables completion at zero', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const TaskFlowApp());
 
-    final greeting = find.text('¡Hola, Ricardo!');
-    final message = find.text('¡Cada tarea completada te acerca a tus metas!');
-
-    expect(greeting, findsOneWidget);
-    expect(message, findsOneWidget);
-    expect(
-      tester.getTopLeft(message).dy,
-      greaterThan(tester.getTopLeft(greeting).dy),
+    final addButton = find.widgetWithText(ElevatedButton, 'Agregar tarea');
+    final completeButton = find.widgetWithText(
+      OutlinedButton,
+      'Completar una tarea',
     );
-    expect(find.byIcon(Icons.checklist_rounded), findsOneWidget);
+
+    expect(find.text('Tareas pendientes: 3'), findsOneWidget);
+    expect(find.text('Aún tienes tareas por organizar.'), findsOneWidget);
+    expect(tester.widget<ElevatedButton>(addButton).onPressed, isNotNull);
+    expect(tester.widget<OutlinedButton>(completeButton).onPressed, isNotNull);
+
+    await tester.tap(addButton);
+    await tester.tap(addButton);
+    await tester.pump();
+    expect(find.text('Tareas pendientes: 5'), findsOneWidget);
+
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(completeButton);
+      await tester.pump();
+    }
+
+    expect(find.text('Tareas pendientes: 0'), findsOneWidget);
+    expect(
+      find.text('¡Excelente! No tienes tareas pendientes.'),
+      findsOneWidget,
+    );
+    expect(tester.widget<ElevatedButton>(addButton).onPressed, isNotNull);
+    expect(tester.widget<OutlinedButton>(completeButton).onPressed, isNull);
+
+    await tester.tap(addButton);
+    await tester.pump();
+
+    expect(find.text('Tareas pendientes: 1'), findsOneWidget);
+    expect(find.text('Aún tienes tareas por organizar.'), findsOneWidget);
+    expect(tester.widget<OutlinedButton>(completeButton).onPressed, isNotNull);
   });
 }
