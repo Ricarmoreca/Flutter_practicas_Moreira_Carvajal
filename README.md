@@ -54,5 +54,26 @@ POST /products         agregar producto
 PATCH /products/:id    actualizar producto
 DELETE /products/:id   eliminar producto
 
-La API concreta se elegirá después. Estas rutas son requisitos, no
-direcciones de un servidor ya conectado.
+Estas rutas describen el contrato pendiente para productos; no corresponden a
+la API de tareas conectada actualmente.
+
+## API de tareas
+
+TaskFlow consulta tareas de JSONPlaceholder mediante una petición `GET` a:
+
+`https://jsonplaceholder.typicode.com/todos?userId=2`
+
+El parámetro de consulta `userId` filtra las tareas del usuario. TaskFlow usa
+el valor `2` en `TaskApiService`; al comprobar la URL, la API devolvió 20
+tareas, con IDs del 21 al 40.
+
+Cada objeto recibido incluye los campos `userId`, `id`, `title` y `completed`.
+`Task.fromJson` asigna esos campos al modelo (`completed` se convierte en
+`isCompleted`) y completa los campos que la API no envía con estos valores:
+
+- `description`: `Sin descripción (API)`
+- `priority`: `Sin prioridad (API)`
+
+Marcar una tarea como completada o pendiente solo actualiza el estado en
+memoria dentro de TaskFlow; el cambio no se envía a la API ni queda guardado al
+recargar.
